@@ -32,7 +32,7 @@ function resolvePath(directory, file, locale = 'en') {
 }
 
 /** Some YAML files contain markdown that needs to be parsed separately. */
-async function parseYAML(directory, file, locale, markdownField, cache = true) {
+async function parseYAML(directory, file, locale, markdownField, cache = true, tex2html = false) {
   const src = resolvePath(directory, file, locale);
   if (cache && YAML_CACHE.has(src)) return YAML_CACHE.get(src);
 
@@ -41,10 +41,10 @@ async function parseYAML(directory, file, locale, markdownField, cache = true) {
   for (const [key, value] of Object.entries(data)) {
     if (markdownField === '*') {
       // Top-level keys (in hints.yaml)
-      data[key] = await (Array.isArray(value) ? Promise.all(value.map(v => parseSimple(v))) : parseSimple(value));
+      data[key] = await (Array.isArray(value) ? Promise.all(value.map(v => parseSimple(v, undefined, tex2html))) : parseSimple(value, undefined, tex2html));
     } else if (markdownField) {
       // Nested objects (in bios.yaml and gloss.yaml)
-      value[markdownField] = await parseSimple(value[markdownField] || '');
+      value[markdownField] = await parseSimple(value[markdownField] || '', undefined, tex2html);
     }
   }
 
@@ -89,7 +89,7 @@ function getNextCourse(directory) {
 // -----------------------------------------------------------------------------
 // Bundle Course Markdown
 
-async function parseCourse(directory, locale, allLocales = ['en']) {
+async function parseCourse(directory, locale, allLocales = ['en'], tex2html = false) {
   const courseId = path.basename(directory);
   const srcFile = resolvePath(directory, 'content.md', locale);
   const content = readFile(srcFile);
@@ -104,7 +104,7 @@ async function parseCourse(directory, locale, allLocales = ['en']) {
   const bios = new Set();
 
   const steps = content.split(/\n---+\r?\n/);
-  const parsed = await Promise.all(steps.map((s, i) => parseStep(s, i, directory, courseId, locale)));
+  const parsed = await Promise.all(steps.map((s, i) => parseStep(s, i, directory, courseId, locale, tex2html)));
 
   const course = {
     id: courseId, locale,

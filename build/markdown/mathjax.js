@@ -56,10 +56,46 @@ async function texToSvg(code, isInline) {
   return mathJaxStore[id] = output;
 }
 
-module.exports.fillTexPlaceholders = async function(doc) {
+async function texToHtml(code, isInline) {
+  const id = entities.decode(code) + (isInline || false) + 'HTML';
+  if (mathJaxStore[id]) return mathJaxStore[id];
+
+  if (!promise) {
+    promise = mathjax.init({
+      loader: {load: ['input/tex-full', 'output/chtml']},
+      // https://docs.mathjax.org/en/latest/options/output/chtml.html#the-configuration-block
+      chtml: {
+        adaptiveCSS: false,
+        fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3.1.0/es5/output/chtml/fonts/woff-v2'
+      }
+    });
+  }
+
+  let output = '';
+
+  try {
+    const MathJax = await promise;
+    const adaptor = MathJax.startup.adaptor;
+
+    const html = await MathJax.tex2chtml(code, {display: !isInline});
+    output = adaptor.outerHTML(html);
+  } catch (e) {
+    warning(`  MathJax Error: ${e.message} at "${code}"`);
+  }
+
+  storeChanged = true;
+  return mathJaxStore[id] = output;
+}
+
+module.exports.fillTexPlaceholders = async function(doc, tex2html = false) {
   const matches = doc.match(/XEQUATIONX[0-9]+XEQUATIONX/g) || [];
   for (const placeholder of matches) {
-    const code = await texToSvg(...placeholders[placeholder]);
+    let code = '';
+    if (tex2html) {
+      code = await texToHtml(...placeholders[placeholder]);
+    } else {
+      code = await texToSvg(...placeholders[placeholder]);
+    }
     doc = doc.replace(placeholder, code);
   }
   return doc;
