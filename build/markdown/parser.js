@@ -54,7 +54,7 @@ const NOWRAP_QUERY = 'code, x-blank, x-blank-mc, x-var, svg.mathjax, x-gloss, x-
 // -----------------------------------------------------------------------------
 // Markdown Parsers
 
-async function parseStep(content, index, directory, courseId, locale = 'en', tex2html = false) {
+async function parseStep(content, index, directory, courseId, locale = 'en') {
   // Custom HTML blocks using :::
   content = blockIndentation(content);
 
@@ -94,7 +94,7 @@ async function parseStep(content, index, directory, courseId, locale = 'en', tex
   metadata.section = checkId(metadata.section, 'section');
 
   // Asynchronously replace all LaTeX Equation placeholders.
-  parsed = await fillTexPlaceholders(parsed, tex2html);
+  parsed = await fillTexPlaceholders(parsed);
 
   // Parse the HTML string as DOM
   const window = new JSDom('<x-step>' + parsed + '</x-step>').window;
@@ -198,7 +198,7 @@ async function parseStep(content, index, directory, courseId, locale = 'en', tex
   return metadata;
 }
 
-async function parseSimple(text, locale = 'en', tex2html = false) {
+async function parseSimple(text, locale = 'en') {
   const renderer = getRenderer({}, '', locale);
   const result = marked(blockIndentation(text), {renderer});
   const window = (new JSDom(result)).window;
@@ -206,7 +206,7 @@ async function parseSimple(text, locale = 'en', tex2html = false) {
   addNoWraps(window.document.body);
   const html = htmlMinify(window.document.body.innerHTML, MINIFY_CONFIG);
   window.close();
-  return await fillTexPlaceholders(html, tex2html);
+  return await fillTexPlaceholders(html);
 }
 
 module.exports.parseStep = cache(parseStep);

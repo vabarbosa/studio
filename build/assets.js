@@ -161,10 +161,10 @@ async function bundleScripts(srcPath, destPath, minify = false, watch = false, n
 // -----------------------------------------------------------------------------
 // Markdown Courses
 
-async function bundleMarkdown(id, locale, allLocales, watch = false, base = CONTENT, tex2html = false) {
+async function bundleMarkdown(id, locale, allLocales, watch = false, base = CONTENT) {
   const start = Date.now();
 
-  const data = await parseCourse(path.join(base, id), locale, allLocales, tex2html);
+  const data = await parseCourse(path.join(base, id), locale, allLocales);
   if (!data) return;
 
   if (data.course) {
@@ -175,7 +175,7 @@ async function bundleMarkdown(id, locale, allLocales, watch = false, base = CONT
   }
 
   // TODO Also watch markdown dependencies (e.g. SVG, PUG or YAML files)
-  if (watch) watchFiles([data.srcFile], () => bundleMarkdown(id, locale, allLocales, false, base, tex2html));
+  if (watch) watchFiles([data.srcFile], () => bundleMarkdown(id, locale, allLocales, false, base));
 }
 
 
@@ -253,7 +253,7 @@ function getAssetFiles(pattern) {
   });
 }
 
-async function buildAssets(minify = false, watch = false, locales = ['en'], tex2html = false) {
+async function buildAssets(minify = false, watch = false, locales = ['en']) {
   const promises = [];
 
   // SVG Icons need to be built BEFORE TS files, so that iconsPath is set.
@@ -288,7 +288,7 @@ async function buildAssets(minify = false, watch = false, locales = ['en'], tex2
   const courses = glob.sync('!(shared|_*|*.*)', {cwd: CONTENT});
   for (const id of courses) {
     for (const locale of locales) {
-      await bundleMarkdown(id, locale, locales, watch, undefined, tex2html).catch(error(`course ${id} [${locale}]`));
+      await bundleMarkdown(id, locale, locales, watch).catch(error(`course ${id} [${locale}]`));
     }
   }
 

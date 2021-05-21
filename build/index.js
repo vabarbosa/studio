@@ -10,10 +10,10 @@ const {buildSearch} = require('./tools/search');
 
 
 (async () => {
-  // Build assets using `mgon-build --assets [--minify] [--watch] [--tex2html]`
+  // Build assets using `mgon-build --assets [--minify] [--watch]`
   if (argv.assets) {
     const locales = argv.locales ? argv.locales.split(',') : CONFIG.locales;
-    await buildAssets(argv.minify || false, argv.watch || false, locales, argv.tex2html || false);
+    await buildAssets(argv.minify || false, argv.watch || false, locales);
   }
 
   // Build the search index
