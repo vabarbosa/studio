@@ -35,3 +35,6 @@ tutor:
   enabled: true
   name: Archie
   icon: images/archie.svg
+
+parser:
+  tex2html: false
