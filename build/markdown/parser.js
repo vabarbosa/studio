@@ -111,6 +111,7 @@ async function parseStep(content, index, directory, courseId, locale = 'en') {
   for (const $md of $$(body, '.md')) {
     $md.classList.remove('md');
     $md.innerHTML = marked($md.innerHTML, {renderer}).replace(/^<p>|<\/p>$/g, '');
+    $md.innerHTML = await fillTexPlaceholders($md.innerHTML);
   }
 
   // Add the [parent] attribute as class to all elements parents
