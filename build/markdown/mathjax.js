@@ -81,7 +81,10 @@ async function texToHtml(code, isInline) {
       },
       addInputText(math, doc) {
         const adaptor = doc.adaptor;
-        const text = adaptor.node('mjx-input-tex', {'aria-hidden': true}, [
+        const text = adaptor.node('mjx-input-tex', {
+          'aria-hidden': true,
+          'style': 'display:none;'
+        }, [
           adaptor.text(math.start.delim + math.math + math.end.delim)
         ]);
         adaptor.append(math.typesetRoot, text);
