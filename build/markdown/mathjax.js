@@ -68,6 +68,24 @@ async function texToHtml(code, isInline) {
 
   if (!promise) {
     promise = mathjax.init({
+      options: {
+        renderActions: {
+          // add the TEX string into the DOM node
+          addInputText: [200,
+            (doc) => {
+              for (const math of doc.math) MathJax.config.addInputText(math, doc);
+            },
+            (math, doc) => MathJax.config.addInputText(math, doc)
+          ]
+        }
+      },
+      addInputText(math, doc) {
+        const adaptor = doc.adaptor;
+        const text = adaptor.node('mjx-input-tex', {'aria-hidden': true}, [
+          adaptor.text(math.start.delim + math.math + math.end.delim)
+        ]);
+        adaptor.append(math.typesetRoot, text);
+      },
       loader: {load: ['input/tex-full', 'output/chtml']},
       // https://docs.mathjax.org/en/latest/options/output/chtml.html#the-configuration-block
       chtml: {
